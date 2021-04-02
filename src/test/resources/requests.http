@@ -1,0 +1,46 @@
+### Customer does not exist
+     
+POST http://localhost:8080/order
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customerId": 10,
+  "type": "Camembert",
+  "count": 2
+}
+### Missing count
+
+POST http://localhost:8080/order
+Content-Type: application/json
+Accept: application/json
+
+{
+"customerId": 10,
+"type": "Camembert"
+}
+
+### Valid create
+
+POST http://localhost:8080/order
+Content-Type: application/json
+Accept: application/json
+
+{
+  "customerId": 1,
+  "type": "Camembert",
+  "count": 2
+}
+
+### Order does not exist
+
+POST http://localhost:8080/order/cancel/10
+Content-Type: application/json
+Accept: application/json
+
+### Valid cancel
+
+POST http://localhost:8080/order/cancel/1
+Content-Type: application/json
+Accept: application/json
+
