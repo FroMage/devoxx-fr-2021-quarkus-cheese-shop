@@ -2,8 +2,18 @@ package fr.fromage.cheeseshop;
 
 public enum Cheese {
 
-    Camembert,
-    Roquefort,
-    Brie,
-    Salers
+    Camembert(7),
+    Roquefort(20),
+    Brie(8),
+    Salers(4);
+
+    private final int dollarPrice;
+
+    Cheese(int dollarPrice) {
+        this.dollarPrice = dollarPrice;
+    }
+
+    public int getDollarPrice() {
+        return dollarPrice;
+    }
 }

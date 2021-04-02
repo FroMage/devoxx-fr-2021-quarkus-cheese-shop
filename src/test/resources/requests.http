@@ -29,7 +29,7 @@ Accept: application/json
 {
   "customerId": 1,
   "type": "Camembert",
-  "count": 2
+  "count": 2000
 }
 
 ### Order does not exist

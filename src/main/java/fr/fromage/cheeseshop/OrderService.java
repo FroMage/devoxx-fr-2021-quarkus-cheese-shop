@@ -1,6 +1,5 @@
 package fr.fromage.cheeseshop;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
@@ -13,9 +12,11 @@ import java.util.concurrent.TimeUnit;
 public class OrderService {
 
     private final KafkaProducer<Long, Order> kafkaProducer;
+    private final PriceService priceService;
 
-    public OrderService(KafkaProducer<Long, Order> kafkaProducer) {
+    public OrderService(KafkaProducer<Long, Order> kafkaProducer, PriceService priceService) {
         this.kafkaProducer = kafkaProducer;
+        this.priceService = priceService;
     }
 
     @Transactional
@@ -48,6 +49,7 @@ public class OrderService {
         order.count = createOrderRequest.getCount();
         order.timestamp = LocalDateTime.now();
         order.status = Order.Status.Submitted;
+        order.princeInBitcoins = priceService.priceInBitcoin(createOrderRequest.getType()) * createOrderRequest.getCount();
         return order;
     }
 

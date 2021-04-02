@@ -23,6 +23,8 @@ public class Order extends PanacheEntity {
 
     public int count;
 
+    public double princeInBitcoins;
+
     public Cheese type;
 
     public LocalDateTime timestamp;
