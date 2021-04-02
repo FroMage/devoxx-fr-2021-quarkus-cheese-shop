@@ -30,4 +30,11 @@ public final class Exceptions {
         }
 
     }
+
+    public static class KafkaException extends RuntimeException {
+
+        public KafkaException(Exception cause) {
+            super(cause);
+        }
+    }
 }
