@@ -9,15 +9,16 @@ Accept: application/json
   "type": "Camembert",
   "count": 2
 }
-### Missing count
+### Wrong count
 
 POST http://localhost:8080/order
 Content-Type: application/json
 Accept: application/json
 
 {
-"customerId": 10,
-"type": "Camembert"
+"customerId": 1,
+"type": "Camembert",
+"count": 0
 }
 
 ### Valid create
