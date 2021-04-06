@@ -2,6 +2,7 @@ package fr.fromage.cheeseshop;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
@@ -13,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 public class OrderService {
 
     private final KafkaProducer<UUID, Order> kafkaProducer;
-    private final PriceService priceService;
+    private final BitcoinPrice bitcoinPrice;
 
-    public OrderService(KafkaProducer<UUID, Order> kafkaProducer, PriceService priceService) {
+    public OrderService(KafkaProducer<UUID, Order> kafkaProducer, @RestClient BitcoinPrice bitcoinPrice) {
         this.kafkaProducer = kafkaProducer;
-        this.priceService = priceService;
+        this.bitcoinPrice = bitcoinPrice;
     }
 
     @Transactional
@@ -51,7 +52,7 @@ public class OrderService {
         order.count = createOrderRequest.getCount();
         order.timestamp = LocalDateTime.now();
         order.status = Order.Status.Submitted;
-        order.princeInBitcoins = priceService.priceInBitcoin(createOrderRequest.getType()) * createOrderRequest.getCount();
+        order.princeInBitcoins = bitcoinPrice.get("USD", createOrderRequest.getType().getDollarPrice()) * createOrderRequest.getCount();
         return order;
     }
 
