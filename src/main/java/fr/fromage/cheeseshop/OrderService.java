@@ -29,7 +29,7 @@ public class OrderService {
             throw new Exceptions.NoCustomerFound(customerId);
         }
         Order order = toOrder(createOrderRequest, customer);
-        Order.persist(order);
+        order.persist();
 
         sendToKafka(order);
 
