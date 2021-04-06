@@ -40,8 +40,8 @@ Content-Type: application/json
 Accept: application/json
 
 ### Valid cancel
-
-POST http://localhost:8080/order/cancel/1
-Content-Type: application/json
-Accept: application/json
+#
+#POST http://localhost:8080/order/cancel/863b769f-2eb0-4363-9c7b-b8941feb7572
+#Content-Type: application/json
+#Accept: application/json
 

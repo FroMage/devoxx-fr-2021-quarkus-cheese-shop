@@ -6,15 +6,16 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
 public class OrderService {
 
-    private final KafkaProducer<Long, Order> kafkaProducer;
+    private final KafkaProducer<UUID, Order> kafkaProducer;
     private final PriceService priceService;
 
-    public OrderService(KafkaProducer<Long, Order> kafkaProducer, PriceService priceService) {
+    public OrderService(KafkaProducer<UUID, Order> kafkaProducer, PriceService priceService) {
         this.kafkaProducer = kafkaProducer;
         this.priceService = priceService;
     }
@@ -44,6 +45,7 @@ public class OrderService {
 
     private Order toOrder(CreateOrderRequest createOrderRequest, Customer customer) {
         Order order = new Order();
+        order.id = UUID.randomUUID();
         order.customer = customer;
         order.type = createOrderRequest.getType();
         order.count = createOrderRequest.getCount();
@@ -54,7 +56,7 @@ public class OrderService {
     }
 
     @Transactional
-    public Order cancel(Long orderId) {
+    public Order cancel(UUID orderId) {
         Order order = Order.findById(orderId);
         if (order == null) {
             throw new Exceptions.NoOrderFound(orderId);

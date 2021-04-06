@@ -1,5 +1,7 @@
 package fr.fromage.cheeseshop;
 
+import java.util.UUID;
+
 public final class Exceptions {
 
     private Exceptions() {
@@ -19,13 +21,13 @@ public final class Exceptions {
 
     public static class NoOrderFound extends RuntimeException {
 
-        private final Long id;
+        private final UUID id;
 
-        public NoOrderFound(Long id) {
+        public NoOrderFound(UUID id) {
             this.id = id;
         }
 
-        public Long getId() {
+        public UUID getId() {
             return id;
         }
 

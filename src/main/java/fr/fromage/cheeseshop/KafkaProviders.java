@@ -4,15 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.common.serialization.LongSerializer;
 import org.apache.kafka.common.serialization.Serializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.UUIDSerializer;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Named;
 import java.util.Map;
+import java.util.UUID;
 
 @ApplicationScoped
 public class KafkaProviders {
@@ -29,9 +30,9 @@ public class KafkaProviders {
     }
 
     @Produces
-    KafkaProducer<Long, Order> getProducer(ObjectMapper objectMapper) {
+    KafkaProducer<UUID, Order> getProducer(ObjectMapper objectMapper) {
         return new KafkaProducer<>(config,
-                new LongSerializer(),
+                new UUIDSerializer(),
                 new OrderSerializer(objectMapper));
     }
 
