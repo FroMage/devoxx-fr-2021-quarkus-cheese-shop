@@ -56,13 +56,4 @@ public class OrderService {
         return order;
     }
 
-    @Transactional
-    public Order cancel(UUID orderId) {
-        Order order = Order.findById(orderId);
-        if (order == null) {
-            throw new Exceptions.NoOrderFound(orderId);
-        }
-        order.status = Order.Status.Canceled;
-        return order;
-    }
 }
