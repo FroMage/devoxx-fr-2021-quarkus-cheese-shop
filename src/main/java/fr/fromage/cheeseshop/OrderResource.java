@@ -26,10 +26,4 @@ public class OrderResource {
     public Order create(@Valid CreateOrderRequest createOrderRequest) {
         return orderService.order(createOrderRequest);
     }
-
-    @Path("cancel/{orderId}")
-    @POST
-    public Order cancel(@PathParam("orderId") String orderId) {
-        return orderService.cancel(UUID.fromString(orderId));
-    }
 }
