@@ -2,8 +2,11 @@ package fr.fromage.cheeseshop;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
@@ -13,11 +16,15 @@ import java.util.concurrent.TimeUnit;
 @Singleton
 public class OrderService {
 
-    private final KafkaProducer<UUID, Order> kafkaProducer;
+//    private final KafkaProducer<UUID, Order> kafkaProducer;
     private final BitcoinPrice bitcoinPrice;
+    @Inject
+    @Channel("warehouse")
+    Emitter<Order> kafkaEmitter;
 
-    public OrderService(KafkaProducer<UUID, Order> kafkaProducer, @RestClient BitcoinPrice bitcoinPrice) {
-        this.kafkaProducer = kafkaProducer;
+
+    public OrderService(/*KafkaProducer<UUID, Order> kafkaProducer, */@RestClient BitcoinPrice bitcoinPrice) {
+//        this.kafkaProducer = kafkaProducer;
         this.bitcoinPrice = bitcoinPrice;
     }
 
@@ -38,7 +45,7 @@ public class OrderService {
 
     private void sendToKafka(Order order) {
         try {
-            kafkaProducer.send(new ProducerRecord<>("cheese-orders", order.id, order)).get(5, TimeUnit.SECONDS);
+            kafkaEmitter.send(order).toCompletableFuture().get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
             throw new Exceptions.KafkaException(e);
         }
