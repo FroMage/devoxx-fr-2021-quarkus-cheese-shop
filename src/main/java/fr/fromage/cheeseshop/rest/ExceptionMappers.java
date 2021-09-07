@@ -1,8 +1,12 @@
-package fr.fromage.cheeseshop;
+package fr.fromage.cheeseshop.rest;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+
+import fr.fromage.cheeseshop.Exceptions;
+import fr.fromage.cheeseshop.Exceptions.NoCustomerFound;
+import fr.fromage.cheeseshop.Exceptions.NoOrderFound;
 
 public final class ExceptionMappers {
 

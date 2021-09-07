@@ -1,4 +1,4 @@
-package fr.fromage.cheeseshop;
+package fr.fromage.cheeseshop.rest.client;
 
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 

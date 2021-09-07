@@ -1,4 +1,4 @@
-package fr.fromage.cheeseshop;
+package fr.fromage.cheeseshop.model;
 
 public enum Cheese {
 
