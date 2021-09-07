@@ -2,8 +2,6 @@ package fr.fromage.cheeseshop.rest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -78,15 +76,10 @@ public class OrderResource {
         if(ourStock.count < order.count) {
             System.err.println(" Asking producers");
             long now = System.nanoTime();
-            UpstreamStock laBelleVacheStock = farmLaBelleVache.checkStock(order.type, order.count);
-            UpstreamStock laGrangeDuFermierStock = farmLaGrangeDuFermier.checkStock(order.type, order.count);
-            UpstreamStock dansLaCaveStock = farmDansLaCave.checkStock(order.type, order.count);
+            Stream<UpstreamStock> producerStock = queryProducers(order);
             System.err.println(" Asking producers took " + ((System.nanoTime() - now) / 1_000_000) + "ms");
-            List<UpstreamStock> byPrice = new ArrayList<>();
-            byPrice.add(laBelleVacheStock);
-            byPrice.add(laGrangeDuFermierStock);
-            byPrice.add(dansLaCaveStock);
-            Collections.sort(byPrice, (a, b) -> Double.compare(a.price, b.price));
+            List<UpstreamStock> byPrice = producerStock.sorted((a, b) -> Double.compare(a.price, b.price))
+                    .collect(Collectors.toList());
             int needed = order.count - ourStock.count;
             // favour cheapest, but prioritise availability
             for(UpstreamStock upstreamStock : byPrice) {
@@ -102,7 +95,7 @@ public class OrderResource {
             }
             if(needed > 0) {
                 // now find the nearest availability
-                List<UpstreamStock> byAvailability = Stream.of(laBelleVacheStock, laGrangeDuFermierStock, dansLaCaveStock)
+                List<UpstreamStock> byAvailability = producerStock
                         .filter(stock -> stock.future() != null)
                         .sorted((a, b) -> a.future().availableDate.compareTo(b.future().availableDate))
                         .collect(Collectors.toList());
@@ -123,6 +116,13 @@ public class OrderResource {
         LocalDate d = availability != null ? availability : LocalDate.now();
         // 2 day delivery?
         order.estimatedDelivery = d.plusDays(2);
+    }
+
+    private Stream<UpstreamStock> queryProducers(Order order) {
+        UpstreamStock laBelleVacheStock = farmLaBelleVache.checkStock(order.type, order.count);
+        UpstreamStock laGrangeDuFermierStock = farmLaGrangeDuFermier.checkStock(order.type, order.count);
+        UpstreamStock dansLaCaveStock = farmDansLaCave.checkStock(order.type, order.count);
+        return Stream.of(laBelleVacheStock, laGrangeDuFermierStock, dansLaCaveStock);
     }
 
     private void sendToKafka(Order order) {

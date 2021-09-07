@@ -58,7 +58,9 @@ public class Farms {
         }
         // fake that we're slow
         try {
-            Thread.sleep((long)Math.floor(Math.random() * 2000));
+            long sleep = (long)Math.floor(Math.random() * 2000);
+            System.err.println("["+origin+"] sleeping "+sleep+"ms");
+            Thread.sleep(sleep);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
