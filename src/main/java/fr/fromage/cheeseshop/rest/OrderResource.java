@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,6 +28,7 @@ import fr.fromage.cheeseshop.rest.client.BitcoinPrice;
 import fr.fromage.cheeseshop.rest.client.FarmDansLaCave;
 import fr.fromage.cheeseshop.rest.client.FarmLaBelleVache;
 import fr.fromage.cheeseshop.rest.client.FarmLaGrangeDuFermier;
+import io.smallrye.mutiny.Uni;
 
 @Path("order")
 public class OrderResource {
@@ -72,11 +74,12 @@ public class OrderResource {
     private void sourceOrder(Order order) {
         Stock ourStock = Stock.findByCheese(order.type);
         LocalDate availability = null;
-        System.err.println("Our stock is "+ourStock.count + " and we need "+order.count);
+        System.err.println("Our stock for "+order.type+" is "+ourStock.count + " and we need "+order.count);
         if(ourStock.count < order.count) {
-            System.err.println(" Asking producers");
+            System.err.println(" Asking producers from thread "+Thread.currentThread());
             long now = System.nanoTime();
             Stream<UpstreamStock> producerStock = queryProducers(order);
+//            Stream<UpstreamStock> producerStock = queryProducersBlocking(order);
             System.err.println(" Asking producers took " + ((System.nanoTime() - now) / 1_000_000) + "ms");
             List<UpstreamStock> byPrice = producerStock.sorted((a, b) -> Double.compare(a.price, b.price))
                     .collect(Collectors.toList());
@@ -118,11 +121,35 @@ public class OrderResource {
         order.estimatedDelivery = d.plusDays(2);
     }
 
-    private Stream<UpstreamStock> queryProducers(Order order) {
-        UpstreamStock laBelleVacheStock = farmLaBelleVache.checkStock(order.type, order.count);
-        UpstreamStock laGrangeDuFermierStock = farmLaGrangeDuFermier.checkStock(order.type, order.count);
-        UpstreamStock dansLaCaveStock = farmDansLaCave.checkStock(order.type, order.count);
+    private Stream<UpstreamStock> queryProducersBlocking(Order order) {
+        UpstreamStock laBelleVacheStock = time(() -> farmLaBelleVache.checkStockBlocking(order.type, order.count));
+        UpstreamStock laGrangeDuFermierStock = time(() -> farmLaGrangeDuFermier.checkStockBlocking(order.type, order.count));
+        UpstreamStock dansLaCaveStock = time(() -> farmDansLaCave.checkStockBlocking(order.type, order.count));
         return Stream.of(laBelleVacheStock, laGrangeDuFermierStock, dansLaCaveStock);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Stream<UpstreamStock> queryProducers(Order order) {
+        Uni<UpstreamStock> laBelleVacheStock = time(farmLaBelleVache.checkStock(order.type, order.count));
+        Uni<UpstreamStock> laGrangeDuFermierStock = time(farmLaGrangeDuFermier.checkStock(order.type, order.count));
+        Uni<UpstreamStock> dansLaCaveStock = time(farmDansLaCave.checkStock(order.type, order.count));
+        // FIXME: variant with CS to show how crap it is?
+        return Uni.combine().all().unis(laBelleVacheStock, laGrangeDuFermierStock, dansLaCaveStock)
+                .combinedWith(list -> (List<UpstreamStock>)list)
+                .await().indefinitely()
+                .stream();
+    }
+
+    private Uni<UpstreamStock> time(Uni<UpstreamStock> uni) {
+        long now = System.nanoTime();
+        return uni.invoke(res -> System.err.println("  Client result from "+res.origin+" took "+((System.nanoTime()-now) / 1_000_000)+"ms on thread "+Thread.currentThread()));
+    }
+
+    private UpstreamStock time(Supplier<UpstreamStock> supplier) {
+        long now = System.nanoTime();
+        UpstreamStock ret = supplier.get();
+        System.err.println("  Client result from "+ret.origin+" took "+((System.nanoTime()-now) / 1_000_000)+"ms on thread "+Thread.currentThread());
+        return ret;
     }
 
     private void sendToKafka(Order order) {

@@ -4,6 +4,7 @@ import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import fr.fromage.cheeseshop.model.Cheese;
 import fr.fromage.cheeseshop.rest.UpstreamStock;
+import io.smallrye.mutiny.Uni;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,5 +18,9 @@ public interface FarmLaGrangeDuFermier {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    UpstreamStock checkStock(@QueryParam("cheese") Cheese cheese, @QueryParam("count") int count);
+    Uni<UpstreamStock> checkStock(@QueryParam("cheese") Cheese cheese, @QueryParam("count") int count);
+
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    UpstreamStock checkStockBlocking(@QueryParam("cheese") Cheese cheese, @QueryParam("count") int count);
 }
