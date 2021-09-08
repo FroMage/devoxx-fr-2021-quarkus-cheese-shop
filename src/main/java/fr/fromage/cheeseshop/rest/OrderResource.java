@@ -24,7 +24,6 @@ import fr.fromage.cheeseshop.model.Customer;
 import fr.fromage.cheeseshop.model.Order;
 import fr.fromage.cheeseshop.model.Stock;
 import fr.fromage.cheeseshop.rest.UpstreamStock.OrderLine;
-import fr.fromage.cheeseshop.rest.client.BitcoinPrice;
 import fr.fromage.cheeseshop.rest.client.FarmDansLaCave;
 import fr.fromage.cheeseshop.rest.client.FarmLaBelleVache;
 import fr.fromage.cheeseshop.rest.client.FarmLaGrangeDuFermier;
@@ -32,9 +31,6 @@ import io.smallrye.mutiny.Uni;
 
 @Path("order")
 public class OrderResource {
-
-    @RestClient
-    BitcoinPrice bitcoinPrice;
 
     @RestClient
     FarmLaBelleVache farmLaBelleVache;
@@ -128,14 +124,13 @@ public class OrderResource {
         return Stream.of(laBelleVacheStock, laGrangeDuFermierStock, dansLaCaveStock);
     }
 
-    @SuppressWarnings("unchecked")
     private Stream<UpstreamStock> queryProducers(Order order) {
         Uni<UpstreamStock> laBelleVacheStock = time(farmLaBelleVache.checkStock(order.type, order.count));
         Uni<UpstreamStock> laGrangeDuFermierStock = time(farmLaGrangeDuFermier.checkStock(order.type, order.count));
         Uni<UpstreamStock> dansLaCaveStock = time(farmDansLaCave.checkStock(order.type, order.count));
         // FIXME: variant with CS to show how crap it is?
-        return Uni.combine().all().unis(laBelleVacheStock, laGrangeDuFermierStock, dansLaCaveStock)
-                .combinedWith(list -> (List<UpstreamStock>)list)
+        return Uni.join().all(laBelleVacheStock, laGrangeDuFermierStock, dansLaCaveStock)
+                .andFailFast()
                 .await().indefinitely()
                 .stream();
     }
@@ -168,7 +163,7 @@ public class OrderResource {
         order.count = createOrderRequest.count;
         order.timestamp = LocalDateTime.now();
         order.status = Order.Status.Submitted;
-        order.priceInBitcoins = bitcoinPrice.get("USD", createOrderRequest.type.getDollarPrice()) * createOrderRequest.count;
+        order.price = createOrderRequest.type.price;
         return order;
     }
 

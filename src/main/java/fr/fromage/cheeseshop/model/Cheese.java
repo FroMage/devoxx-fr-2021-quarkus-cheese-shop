@@ -7,13 +7,9 @@ public enum Cheese {
     Brie(8),
     Salers(4);
 
-    private final int dollarPrice;
+    public final int price;
 
-    Cheese(int dollarPrice) {
-        this.dollarPrice = dollarPrice;
-    }
-
-    public int getDollarPrice() {
-        return dollarPrice;
+    Cheese(int price) {
+        this.price = price;
     }
 }

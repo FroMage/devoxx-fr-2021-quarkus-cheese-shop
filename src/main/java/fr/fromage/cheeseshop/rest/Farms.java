@@ -38,7 +38,7 @@ public class Farms {
     private UpstreamStock getStock(Cheese cheese, int count, String origin) {
         UpstreamStock order = new UpstreamStock();
         // min price 1 up until resale price  - 1
-        order.price = 1 + Math.random() * (cheese.getDollarPrice() - 2);
+        order.price = 1 + Math.random() * (cheese.price - 2);
         order.origin = origin;
         // from 0 to count available now
         int availableNow = (int) Math.ceil(Math.random() * (count + 1));
