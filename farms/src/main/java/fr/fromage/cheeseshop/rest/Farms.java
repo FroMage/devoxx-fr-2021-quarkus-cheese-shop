@@ -1,15 +1,14 @@
 package fr.fromage.cheeseshop.rest;
 
-import java.time.LocalDate;
+import fr.fromage.cheeseshop.model.Cheese;
+import fr.fromage.cheeseshop.rest.UpstreamStock.OrderLine;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
-
-import fr.fromage.cheeseshop.model.Cheese;
-import fr.fromage.cheeseshop.rest.UpstreamStock.OrderLine;
+import java.time.LocalDate;
 
 @Path("farms")
 public class Farms {
