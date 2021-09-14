@@ -9,6 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
+import java.util.Random;
 
 @Path("farms")
 public class Farms {
@@ -17,6 +18,7 @@ public class Farms {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public UpstreamStock stockLaBelleVache(@QueryParam("cheese") Cheese cheese, @QueryParam("count") int count) {
+        delay();
         return getStock(cheese, count, "La Belle Vache");
     }
 
@@ -24,6 +26,7 @@ public class Farms {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public UpstreamStock stockDansLaCave(@QueryParam("cheese") Cheese cheese, @QueryParam("count") int count) {
+        fault();
         return getStock(cheese, count, "Dans La Cave");
     }
 
@@ -63,5 +66,23 @@ public class Farms {
             throw new RuntimeException(e);
         }
         return order;
+    }
+
+    private final Random random = new Random();
+
+    private void delay() {
+        if (random.nextBoolean()) {
+            try {
+                Thread.sleep(random.nextInt(2000));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private void fault() {
+        if (random.nextBoolean()) {
+            throw new RuntimeException("Pas de bras, pas de gouda!");
+        }
     }
 }

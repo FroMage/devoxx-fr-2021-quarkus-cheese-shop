@@ -1,5 +1,6 @@
 package fr.fromage.cheeseshop.rest.client;
 
+import org.eclipse.microprofile.faulttolerance.Timeout;
 import org.eclipse.microprofile.rest.client.inject.RegisterRestClient;
 
 import fr.fromage.cheeseshop.model.Cheese;
@@ -18,6 +19,7 @@ public interface FarmLaGrangeDuFermier {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Timeout(5000)
     Uni<UpstreamStock> checkStock(@QueryParam("cheese") Cheese cheese, @QueryParam("count") int count);
 
     @GET
