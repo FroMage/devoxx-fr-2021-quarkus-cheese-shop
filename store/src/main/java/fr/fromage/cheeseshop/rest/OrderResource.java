@@ -12,6 +12,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 
+import io.quarkus.hibernate.reactive.panache.Panache;
 import org.eclipse.microprofile.reactive.messaging.Channel;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -54,9 +55,12 @@ public class OrderResource {
         return customerUni
                 .onItem().ifNull().failWith(() -> new Exceptions.NoCustomerFound(customerId))
                 .onItem().transform(customer -> toOrder(createOrderRequest, customer))
-                .call(order -> order.persist())
-                .call(order -> sourceOrder(order))
-                .call(order -> sendToKafka(order));
+                .call(order -> Panache.withTransaction(() -> {
+                    return order.persist()
+                            .replaceWith(order);
+                }))
+                .call(o -> sourceOrder(o))
+                .call(o -> sendToKafka(o));
     }
 
     private Uni<?> sourceOrder(Order order) {

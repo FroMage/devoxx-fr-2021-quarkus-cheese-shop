@@ -36,5 +36,6 @@
     <modules>
         <module>store</module>
         <module>farms</module>
+        <module>warehouse</module>
     </modules>
 </project>

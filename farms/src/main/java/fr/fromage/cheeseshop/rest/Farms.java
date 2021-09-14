@@ -18,7 +18,7 @@ public class Farms {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public UpstreamStock stockLaBelleVache(@QueryParam("cheese") Cheese cheese, @QueryParam("count") int count) {
-        delay();
+//        delay();
         return getStock(cheese, count, "La Belle Vache");
     }
 
@@ -26,7 +26,7 @@ public class Farms {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public UpstreamStock stockDansLaCave(@QueryParam("cheese") Cheese cheese, @QueryParam("count") int count) {
-        fault();
+//        fault();
         return getStock(cheese, count, "Dans La Cave");
     }
 
