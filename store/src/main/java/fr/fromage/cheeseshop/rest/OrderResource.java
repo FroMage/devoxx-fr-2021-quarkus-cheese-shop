@@ -23,6 +23,7 @@ import fr.fromage.cheeseshop.rest.UpstreamStock.OrderLine;
 import fr.fromage.cheeseshop.rest.client.FarmDansLaCave;
 import fr.fromage.cheeseshop.rest.client.FarmLaBelleVache;
 import fr.fromage.cheeseshop.rest.client.FarmLaGrangeDuFermier;
+import io.quarkus.hibernate.reactive.panache.Panache;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.MutinyEmitter;
 
@@ -54,7 +55,7 @@ public class OrderResource {
         return customerUni
                 .onItem().ifNull().failWith(() -> new Exceptions.NoCustomerFound(customerId))
                 .onItem().transform(customer -> toOrder(createOrderRequest, customer))
-                .call(order -> order.persist())
+                .call(order -> Panache.withTransaction(() -> order.persist()))
                 .call(order -> sourceOrder(order))
                 .call(order -> sendToKafka(order));
     }
